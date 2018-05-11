@@ -1,7 +1,8 @@
 ![image](https://raw.githubusercontent.com/georgeworld/georgeworld.github.com/master/ginkgo/di/img/ginkgo-di-logo.png)
 # Ginkgo DI Framework
 A Simple dependency injection framework(DI/IOC)，
- 一个精简的Java依赖注入框架。
+一个精简的DI依赖注入框架（IOC），适用于那些不方便引入Spring依赖的项目，目前功能包括使用注解式注册Bean，使用手动硬编码式注册Bean，按照接口获取并使用托管Bean对象，按照bean Id的方式获取bean对象等。
+
 # 用法
 ## 使用注解扫包式初始化DI环境
 <pre><code>
