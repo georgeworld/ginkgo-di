@@ -24,7 +24,7 @@ A Simple dependency injection framework(DI/IOC)，
     }
 </pre></code>
 
-## 使用手动编码时注册类方式，初始化DI环境
+## 使用手动编码式注册类方式，初始化DI环境
 <pre><code>
 @Before
     public void setUp() {
