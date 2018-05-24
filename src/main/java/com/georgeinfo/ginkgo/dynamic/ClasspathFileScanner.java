@@ -29,7 +29,7 @@ public class ClasspathFileScanner {
      * @param pack 指定被扫描的包路径，如：com.georgeinfo.controller
      * @return 扫描到的类名字集合，如：[com.georgeinfo.controller.User,com.georgeinfo.controller.Customer]等
      */
-    public static Set<String> getFileNameOfPackage(String pack) throws ScannerException {
+    public static Set<String> getFileNameOfPackage(String[] pack) throws ScannerException {
         return scanFilesInClassPath(pack, true, new ClassOnlyFilter());
     }
 
@@ -40,7 +40,7 @@ public class ClasspathFileScanner {
      * @param recursive 是否递归扫描子包
      * @return 扫描到的类名字集合，如：[com.georgeinfo.controller.User,com.georgeinfo.controller.Customer]等
      **/
-    public static Set<String> getClassNameOfPackage(String pack, boolean recursive) throws ScannerException {
+    public static Set<String> getClassNameOfPackage(String[] pack, boolean recursive) throws ScannerException {
         return scanFilesInClassPath(pack, recursive, new ClassOnlyFilter());
     }
 
@@ -53,7 +53,7 @@ public class ClasspathFileScanner {
      * @param recursive       是否递归扫描子包
      * @return 扫描到的类名字集合，如：[com.georgeinfo.controller.User,com.georgeinfo.controller.Customer]等
      **/
-    public static Set<String> getClassNameOfPackage(String pack, String classNameSuffix, boolean recursive) throws ScannerException {
+    public static Set<String> getClassNameOfPackage(String[] pack, String classNameSuffix, boolean recursive) throws ScannerException {
         if (classNameSuffix != null && !classNameSuffix.trim().isEmpty()) {
             return scanFilesInClassPath(pack, recursive, new ClassOnlyAndNameFilter(classNameSuffix));
         } else {
@@ -64,68 +64,73 @@ public class ClasspathFileScanner {
     /**
      * 扫描指定的包路径，把扫描到的类的类名（包括包路径的类全名）汇聚成一个集合，返回
      *
-     * @param pack           待被扫描的包路径，如：com.georgeinfo.controller
+     * @param packs          待被扫描的包路径，如：com.georgeinfo.controller，如果要全classpath都扫描，就传入new String[]{"/"}
      * @param fileNameFilter 文件名称过滤器
      * @param recursive      是否递归扫描子包
      * @return 扫描到的类文件路径集合，具体类文件路径的格式，由参数@link{FileNameFilter}中的getFileName(...)来决定
      **/
-    public static Set<String> scanFilesInClassPath(String pack, boolean recursive, FileNameFilter fileNameFilter) throws ScannerException {
+    public static Set<String> scanFilesInClassPath(String[] packs, boolean recursive, FileNameFilter fileNameFilter) throws ScannerException {
+        if (packs == null || packs.length == 0) {
+            return null;
+        }
+
         Set<String> filesInClassPath = new LinkedHashSet();
+        for (String pack : packs) {
+            String packageName = pack;
+            String packageDirName = packageName.replace('.', '/');
 
-        String packageName = pack;
-        String packageDirName = packageName.replace('.', '/');
+            try {
+                Enumeration<URL> dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
+                //遍历指定包路径下的所有文件
+                while (dirs.hasMoreElements()) {
+                    URL url = (URL) dirs.nextElement();
+                    String protocol = url.getProtocol();
 
-        try {
-            Enumeration<URL> dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
-            //遍历指定包路径下的所有文件
-            while (dirs.hasMoreElements()) {
-                URL url = (URL) dirs.nextElement();
-                String protocol = url.getProtocol();
-
-                //扫到的直接是.class文件或者classpath文件夹
-                if ("file".equals(protocol)) {
+                    //扫到的直接是.class文件或者classpath文件夹
+                    if ("file".equals(protocol)) {
 //                    logger.info("## Classpath file scanning in classpath.");
 
-                    //文件的物理路径
-                    String filePhysicalPath = URLDecoder.decode(url.getFile(), "UTF-8");
+                        //文件的物理路径
+                        String filePhysicalPath = URLDecoder.decode(url.getFile(), "UTF-8");
 
-                    //将扫描到的class文件，加入到fileClassPaths中
-                    findAndAddFile(packageName, filePhysicalPath, recursive, filesInClassPath, fileNameFilter);
-                } else if ("jar".equals(protocol)) {//如果扫描到的是.jar包
+                        //将扫描到的class文件，加入到fileClassPaths中
+                        findAndAddFile(packageName, filePhysicalPath, recursive, filesInClassPath, fileNameFilter);
+                    } else if ("jar".equals(protocol)) {//如果扫描到的是.jar包
 //                    logger.info("## Classpath file scanning in jar.");
-                    JarFile jar = ((JarURLConnection) url.openConnection()).getJarFile();
+                        JarFile jar = ((JarURLConnection) url.openConnection()).getJarFile();
 
-                    //再去读取jar包里的class文件
-                    Enumeration<JarEntry> entries = jar.entries();
-                    while (entries.hasMoreElements()) {
-                        JarEntry entry = (JarEntry) entries.nextElement();
-                        String name = entry.getName();
+                        //再去读取jar包里的class文件
+                        Enumeration<JarEntry> entries = jar.entries();
+                        while (entries.hasMoreElements()) {
+                            JarEntry entry = (JarEntry) entries.nextElement();
+                            String name = entry.getName();
 
-                        if (name.charAt(0) == '/') {
-                            name = name.substring(1);
-                        }
-
-                        if (name.startsWith(packageDirName)) {
-                            int idx = name.lastIndexOf('/');
-
-                            if (idx != -1) {
-                                packageName = name.substring(0, idx).replace('/', '.');
+                            if (name.charAt(0) == '/') {
+                                name = name.substring(1);
                             }
 
-                            if ((idx != -1) || (recursive)) {
-                                if (!entry.isDirectory()) {//如果不是目录，才受理
-                                    if (fileNameFilter.accept(name)) {//经过了客户过滤器检测，则将该文件处理后加入文件集合中
-                                        filesInClassPath.add(fileNameFilter.getFileName(pack, name));
+                            if (name.startsWith(packageDirName)) {
+                                int idx = name.lastIndexOf('/');
+
+                                if (idx != -1) {
+                                    packageName = name.substring(0, idx).replace('/', '.');
+                                }
+
+                                if ((idx != -1) || (recursive)) {
+                                    if (!entry.isDirectory()) {//如果不是目录，才受理
+                                        if (fileNameFilter.accept(name)) {//经过了客户过滤器检测，则将该文件处理后加入文件集合中
+                                            filesInClassPath.add(fileNameFilter.getFileName(pack, name));
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
-        } catch (IOException ex) {
+            } catch (IOException ex) {
 //            logger.error(ex);
-            throw new ScannerException("## Exception when scanning class file.", ex);
+                throw new ScannerException("## Exception when scanning class file.", ex);
+            }
         }
 
         return filesInClassPath;

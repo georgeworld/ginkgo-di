@@ -19,10 +19,12 @@ public class AnnotationRegistrarImpl implements BeanRegister {
         context = BaseApplicationContext.getInstance();
     }
 
-    public ContextProvider setBeanPackPath(String packPath) throws ScannerException, DIException {
-        if (packPath != null && !packPath.trim().isEmpty()) {
+    public ContextProvider setBeanPackPath(String[] packPath) throws ScannerException, DIException {
+        if (packPath != null && packPath.length > 0) {
             //统一格式，兼容使用者“com.georgeinfo/controller”这种不标准输入
-            packPath = packPath.replace("/", ".");
+            for (int i = 0; i < packPath.length; i++) {
+                packPath[i] = packPath[i].replace("/", ".");
+            }
 
             //让上下文容器去扫描指定包路径下的所有注解标示bean
             context.scanAndregisterBean(packPath);

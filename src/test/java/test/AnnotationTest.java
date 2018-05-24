@@ -38,7 +38,7 @@ public class AnnotationTest {
         try {
             BaseApplicationContext context = BAC
                     .annotation()
-                    .setBeanPackPath("test.service")
+                    .setBeanPackPath(new String[]{"test.service"})
                     .build();
             System.out.println("## 当前DI容器中，一共有【" + context.getBeanSize() + "】个bean实例");
         } catch (ScannerException e) {

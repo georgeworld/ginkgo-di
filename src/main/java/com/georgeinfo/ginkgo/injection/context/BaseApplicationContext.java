@@ -79,7 +79,7 @@ public class BaseApplicationContext {
      *
      * @param packPath 待被扫描的包路径，如：com.georgeinfo.service
      */
-    public void scanAndregisterBean(String packPath) throws ScannerException, DIException {
+    public void scanAndregisterBean(String[] packPath) throws ScannerException, DIException {
         //通用类扫描器，扫描时只收集类，不做具体处理，具体处理时再遍历一遍扫描到的类集合，工作职责分割清楚
         Set<String> classpathFileSet = ClasspathFileScanner.getFileNameOfPackage(packPath);
         //遍历扫描到的类，实例化并加入上下文容器中
