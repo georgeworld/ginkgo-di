@@ -1,7 +1,7 @@
 package com.georgeinfo.ginkgo.dynamic.filterimpl;
 
 import com.georgeinfo.ginkgo.dynamic.FileNameFilter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 仅受理.class文件，并且对类名字后缀（如UserController.class这个类文件，<br>

@@ -8,7 +8,7 @@ import com.georgeinfo.ginkgo.injection.util.DIBasicUtil;
 import com.georgeinfo.ginkgo.injection.bean.BeanScope;
 import com.georgeinfo.ginkgo.injection.bean.BeanWrapper;
 import com.georgeinfo.ginkgo.injection.annotation.Service;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
