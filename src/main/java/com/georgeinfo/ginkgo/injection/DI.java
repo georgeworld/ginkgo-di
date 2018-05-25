@@ -1,6 +1,6 @@
 package com.georgeinfo.ginkgo.injection;
 
-import com.georgeinfo.ginkgo.injection.context.BaseApplicationContext;
+import com.georgeinfo.ginkgo.injection.context.impl.DefaultApplicationContextImpl;
 import com.georgeinfo.ginkgo.injection.exception.DIException;
 
 /**
@@ -16,7 +16,7 @@ public class DI {
      * @return 查询出的bean实现类对象
      */
     public static <T> T getBeanByInterface(Class<T> interfaceClass) throws DIException {
-        T obj = BaseApplicationContext.getInstance().getBeanInstanceByInterfaceName(interfaceClass.getName());
+        T obj = DefaultApplicationContextImpl.getInstance().getBeanInstanceByInterfaceName(interfaceClass.getName());
         if (obj != null) {
             return obj;
         }
@@ -31,6 +31,6 @@ public class DI {
      * @return 查询出的bean实现类对象
      **/
     public static <T> T getBeanById(String beanId) throws DIException {
-        return (T) BaseApplicationContext.getInstance().getBeanInstanceById(beanId);
+        return (T) DefaultApplicationContextImpl.getInstance().getBeanInstanceById(beanId);
     }
 }

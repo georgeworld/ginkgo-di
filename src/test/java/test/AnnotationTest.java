@@ -3,7 +3,8 @@ package test;
 import com.georgeinfo.ginkgo.dynamic.ScannerException;
 import com.georgeinfo.ginkgo.injection.BAC;
 import com.georgeinfo.ginkgo.injection.DI;
-import com.georgeinfo.ginkgo.injection.context.BaseApplicationContext;
+import com.georgeinfo.ginkgo.injection.context.ApplicationContext;
+import com.georgeinfo.ginkgo.injection.context.impl.DefaultApplicationContextImpl;
 import com.georgeinfo.ginkgo.injection.exception.DIException;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -36,7 +37,7 @@ public class AnnotationTest {
         //初始化DI环境，在正式的项目中，在项目的入口处初始化一次即可
         System.out.println("-- 扫包解析注解方式，开始初始化DI环境 ---");
         try {
-            BaseApplicationContext context = BAC
+            ApplicationContext context = BAC
                     .annotation()
                     .setBeanPackPath(new String[]{"test.service"})
                     .build();

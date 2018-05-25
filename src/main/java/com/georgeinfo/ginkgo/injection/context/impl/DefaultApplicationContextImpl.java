@@ -1,7 +1,8 @@
-package com.georgeinfo.ginkgo.injection.context;
+package com.georgeinfo.ginkgo.injection.context.impl;
 
 import com.georgeinfo.ginkgo.dynamic.ClasspathFileScanner;
 import com.georgeinfo.ginkgo.dynamic.ScannerException;
+import com.georgeinfo.ginkgo.injection.context.ApplicationContext;
 import com.georgeinfo.ginkgo.injection.exception.DIException;
 import com.georgeinfo.ginkgo.injection.util.DIBasicUtil;
 import com.georgeinfo.ginkgo.injection.bean.BeanScope;
@@ -18,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author George (GeorgeWorld@qq.com)
  */
-public class BaseApplicationContext {
+public class DefaultApplicationContextImpl implements ApplicationContext {
     /**
      * bean实例容器map，key=Bean ID，一般是类短名（第一个字母小写）
      */
@@ -31,15 +32,15 @@ public class BaseApplicationContext {
     /**
      * 私有构造方法，确保本类的对象是一个单例
      */
-    private BaseApplicationContext() {
+    private DefaultApplicationContextImpl() {
     }
 
     //## 线程安全的惰性单例模式 开始 #################################
     private static class ConfigurationHolder {
-        private static final BaseApplicationContext instance = new BaseApplicationContext();
+        private static final DefaultApplicationContextImpl instance = new DefaultApplicationContextImpl();
     }
 
-    public static BaseApplicationContext getInstance() {
+    public static DefaultApplicationContextImpl getInstance() {
         return ConfigurationHolder.instance;
     }
     //## 线程安全的惰性单例模式 结束 #################################
@@ -85,7 +86,7 @@ public class BaseApplicationContext {
         //遍历扫描到的类，实例化并加入上下文容器中
         for (String fileClasspath : classpathFileSet) {
             Class<?> clazz = null;
-            fileClasspath = StringUtils.removeEnd(fileClasspath.replace("/","."),".class");
+            fileClasspath = StringUtils.removeEnd(fileClasspath.replace("/", "."), ".class");
             try {
                 clazz = Class.forName(fileClasspath);
             } catch (ClassNotFoundException ex) {

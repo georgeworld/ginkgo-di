@@ -6,13 +6,13 @@ package com.georgeinfo.ginkgo.injection.context;
  * @author George (GeorgeWorld@qq.com)
  */
 public class ContextProvider {
-    private final BaseApplicationContext context;
+    private final ApplicationContext context;
 
-    public ContextProvider(BaseApplicationContext context) {
+    public ContextProvider(ApplicationContext context) {
         this.context = context;
     }
 
-    public BaseApplicationContext build() {
+    public ApplicationContext build() {
         context.buildContext();
         return context;
     }

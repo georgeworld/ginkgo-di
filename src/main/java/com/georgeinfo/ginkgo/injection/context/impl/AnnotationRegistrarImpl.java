@@ -1,9 +1,9 @@
 package com.georgeinfo.ginkgo.injection.context.impl;
 
 import com.georgeinfo.ginkgo.dynamic.ScannerException;
+import com.georgeinfo.ginkgo.injection.context.ApplicationContext;
 import com.georgeinfo.ginkgo.injection.exception.DIException;
 import com.georgeinfo.ginkgo.injection.context.ContextProvider;
-import com.georgeinfo.ginkgo.injection.context.BaseApplicationContext;
 import com.georgeinfo.ginkgo.injection.context.BeanRegister;
 
 /**
@@ -13,10 +13,13 @@ import com.georgeinfo.ginkgo.injection.context.BeanRegister;
  */
 public class AnnotationRegistrarImpl implements BeanRegister {
 
-    private final BaseApplicationContext context;
+    private final ApplicationContext context;
 
     public AnnotationRegistrarImpl() {
-        context = BaseApplicationContext.getInstance();
+        this.context = DefaultApplicationContextImpl.getInstance();
+    }
+    public AnnotationRegistrarImpl(ApplicationContext context) {
+        this.context = context;
     }
 
     public ContextProvider setBeanPackPath(String[] packPath) throws ScannerException, DIException {

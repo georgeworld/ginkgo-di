@@ -1,9 +1,9 @@
 package com.georgeinfo.ginkgo.injection.context.impl;
 
+import com.georgeinfo.ginkgo.injection.context.ApplicationContext;
 import com.georgeinfo.ginkgo.injection.exception.DIException;
 import com.georgeinfo.ginkgo.injection.bean.BeanScope;
 import com.georgeinfo.ginkgo.injection.context.ManualBeanRegister;
-import com.georgeinfo.ginkgo.injection.context.BaseApplicationContext;
 import com.georgeinfo.ginkgo.injection.context.BeanRegister;
 
 /**
@@ -12,11 +12,15 @@ import com.georgeinfo.ginkgo.injection.context.BeanRegister;
  * @author George (GeorgeWorld@qq.com)
  */
 public class ManualRegisterImpl implements BeanRegister,ManualBeanRegister {
-    private final BaseApplicationContext context;
+    private final ApplicationContext context;
     private final ManualRegisterAdder adder;
 
     public ManualRegisterImpl() {
-        context = BaseApplicationContext.getInstance();
+        context = DefaultApplicationContextImpl.getInstance();
+        adder = new ManualRegisterAdder(context);
+    }
+    public ManualRegisterImpl(ApplicationContext context) {
+        this.context = context;
         adder = new ManualRegisterAdder(context);
     }
 
