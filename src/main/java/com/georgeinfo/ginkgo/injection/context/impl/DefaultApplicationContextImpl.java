@@ -2,12 +2,14 @@ package com.georgeinfo.ginkgo.injection.context.impl;
 
 import com.georgeinfo.ginkgo.dynamic.ClasspathFileScanner;
 import com.georgeinfo.ginkgo.dynamic.ScannerException;
+import com.georgeinfo.ginkgo.injection.annotation.Configuration;
+import com.georgeinfo.ginkgo.injection.config.DIConfiguration;
+import com.georgeinfo.ginkgo.injection.config.DIConfigurationDefaultImpl;
 import com.georgeinfo.ginkgo.injection.context.ApplicationContext;
 import com.georgeinfo.ginkgo.injection.exception.DIException;
-import com.georgeinfo.ginkgo.injection.util.DIBasicUtil;
+import com.georgeinfo.ginkgo.injection.handler.ClassScanningHandler;
 import com.georgeinfo.ginkgo.injection.bean.BeanScope;
 import com.georgeinfo.ginkgo.injection.bean.BeanWrapper;
-import com.georgeinfo.ginkgo.injection.annotation.Service;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Set;
@@ -83,7 +85,8 @@ public class DefaultApplicationContextImpl implements ApplicationContext {
     public void scanAndregisterBean(String[] packPath) throws ScannerException, DIException {
         //通用类扫描器，扫描时只收集类，不做具体处理，具体处理时再遍历一遍扫描到的类集合，工作职责分割清楚
         Set<String> classpathFileSet = ClasspathFileScanner.getFileNameOfPackage(packPath);
-        //遍历扫描到的类，实例化并加入上下文容器中
+        //遍历扫描到的类，寻找入口配置类
+        DIConfiguration config = null;
         for (String fileClasspath : classpathFileSet) {
             Class<?> clazz = null;
             fileClasspath = StringUtils.removeEnd(fileClasspath.replace("/", "."), ".class");
@@ -93,20 +96,29 @@ public class DefaultApplicationContextImpl implements ApplicationContext {
                 throw new ScannerException("### Class[" + fileClasspath + "] Not Found.", ex);
             }
 
-            //处理扫描到的注解标注类（目前只处理@Service一种注解，以后可以增加，或则会把处理注解的过程外放延后到应用层）
-            //判断扫描到的类，是否标注了@Service注解
-            if (clazz.isAnnotationPresent(Service.class)) {
-                Service serviceAnnotation = clazz.getAnnotation(Service.class);
-                String beanId = serviceAnnotation.name();
-                if (beanId == null || beanId.trim().isEmpty()) {
-                    //将类短名字转换为驼峰字符串
-                    beanId = DIBasicUtil.classNameToBeanName(clazz);
+            //判断找到的是否是合法配置实现类
+            if (clazz.isAnnotationPresent(Configuration.class)) {//找到了配置文件实现类
+                if (DIConfiguration.class.isAssignableFrom(clazz)) {//找到的被注解的配置类，是BasicConfiguration的子类
+                    try {
+                        config = (DIConfiguration) clazz.newInstance();
+                        break;
+                    } catch (InstantiationException | IllegalAccessException ex) {
+                        throw new DIException("## Exception when create DIConfiguration instance.", ex);
+                    }
                 }
-
-                addBean(beanId, clazz, serviceAnnotation.beanSope());
             }
         }
 
+        if (config == null) {//如果在classpath中，没有找到合法的配置实现类，则使用默认配置类
+            config = new DIConfigurationDefaultImpl();
+        }
+
+        //从配置类中，获得类扫描处理器的对象
+        ClassScanningHandler scanningHandler = config.getClassScanningHandler();
+        boolean resultOfScanning = scanningHandler.scanningAndProcessing(this, classpathFileSet);
+        if (resultOfScanning != true) {
+            throw new DIException("## Cannot handle scanned classes");
+        }
     }
 
 
