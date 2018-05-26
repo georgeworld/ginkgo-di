@@ -50,13 +50,14 @@ public class DefaultApplicationContextImpl implements ApplicationContext {
     /**
      * 向上下文环境添加一个bean
      */
-    public boolean addBean(String beanId, Class<?> beanImpl, BeanScope beanScope) throws DIException {
-        BeanWrapper bean = new BeanWrapper(beanScope, beanImpl);
+    public boolean addBean(String beanId, BeanWrapper bean) throws DIException {
         //向以beanId为key的容器注册bean
         beanMap.put(beanId, bean);
 
+        Class<?> beanClass = bean.getClazz();
+
         //向以接口类名或者实现类类名为key的容器注册bean
-        Class<?>[] interfaces = beanImpl.getInterfaces();
+        Class<?>[] interfaces = beanClass.getInterfaces();
         if (interfaces != null && interfaces.length > 0) {
             for (Class<?> iface : interfaces) {
                 interfaceNameBeanIdMap.put(iface.getName(), beanId);
@@ -64,10 +65,28 @@ public class DefaultApplicationContextImpl implements ApplicationContext {
         }
 
         //以bean自己的类名称为key，向容器注册bean
-        String beanClassName = beanImpl.getName();
+        String beanClassName = beanClass.getName();
         interfaceNameBeanIdMap.put(beanClassName, beanId);
 
         return true;
+    }
+
+    /**
+     * 向上下文环境添加一个bean
+     */
+    public boolean addBean(String beanId, Class<?> beanClass, BeanScope beanScope) throws DIException {
+        BeanWrapper bean = new BeanWrapper(beanScope, beanClass);
+
+        return addBean(beanId, bean);
+    }
+
+    /**
+     * 向上下文环境添加一个bean
+     */
+    public boolean addBean(String beanId, Object beanImpl, BeanScope beanScope) throws DIException {
+        BeanWrapper bean = new BeanWrapper(beanScope, beanImpl);
+
+        return addBean(beanId, bean);
     }
 
     /**

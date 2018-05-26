@@ -31,6 +31,18 @@ public class BeanWrapper {
         }
     }
 
+    public BeanWrapper(BeanScope beanScope, Object object) throws DIException {
+        this.beanScope = beanScope;
+        this.clazz = object.getClass();
+
+        if (beanScope.equals(BeanScope.singleton)) {
+            this.instance = object;
+
+            //对于单例注入，bean实例创建完成后，执行bean的初始化方法
+            doAfterPropertiesSet(this.instance);
+        }
+    }
+
     public Class<?> getClazz() {
         return this.clazz;
     }

@@ -15,11 +15,20 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public interface ApplicationContext {
 
+    /**
+     * 向上下文环境添加一个bean
+     */
+    public boolean addBean(String beanId, BeanWrapper bean) throws DIException;
 
     /**
      * 向上下文环境添加一个bean
      */
     public boolean addBean(String beanId, Class<?> beanImpl, BeanScope beanScope) throws DIException;
+
+    /**
+     * 向上下文环境添加一个bean
+     */
+    public boolean addBean(String beanId, Object beanImpl, BeanScope beanScope) throws DIException;
 
     /**
      * 啥都不干，以后有用
