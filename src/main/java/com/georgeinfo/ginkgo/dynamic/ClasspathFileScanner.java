@@ -77,6 +77,9 @@ public class ClasspathFileScanner {
         Set<String> filesInClassPath = new LinkedHashSet();
         for (String pack : packs) {
             String packageName = pack;
+            if(packageName.trim().equals("/")){
+                packageName = ""; //从根目录开始扫描所有类
+            }
             String packageDirName = packageName.replace('.', '/');
 
             try {
