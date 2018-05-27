@@ -77,10 +77,15 @@ public class ClasspathFileScanner {
         Set<String> filesInClassPath = new LinkedHashSet();
         for (String pack : packs) {
             String packageName = pack;
-            if(packageName.trim().equals("/")){
+            String packageDirName;
+
+            if (packageName.trim().equals("/")) {
                 packageName = ""; //从根目录开始扫描所有类
+                packageDirName = packageName;
+            } else {
+                packageName = packageName.trim();
+                packageDirName = packageName.replace('.', '/');
             }
-            String packageDirName = packageName.replace('.', '/');
 
             try {
                 Enumeration<URL> dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
@@ -174,7 +179,14 @@ public class ClasspathFileScanner {
         //遍历扫描到的文件
         for (File file : filesInDir) {
             if (file.isDirectory()) {//如果是目录，则把包路径累加上当前目录名字，然后则递归继续扫描这个目录
-                findAndAddFile(packageName + "." + file.getName(),
+                String nextFilePackPath;
+                if (packageName == null || packageName.trim().isEmpty()) { //如果当前是根目录，则直接把文件名当做下级目录路径
+                    nextFilePackPath = file.getName();
+                } else {//如果不是根目录，则把上级包路径加上当前文件名，组成下级待扫描的目录路径
+                    nextFilePackPath = packageName + "." + file.getName();
+                }
+
+                findAndAddFile(nextFilePackPath,
                         file.getAbsolutePath(),
                         recursive,
                         filesInClassPath,

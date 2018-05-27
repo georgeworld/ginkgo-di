@@ -27,7 +27,7 @@ public class BeanWrapper {
                 clazz.newInstance();
             }
         } catch (InstantiationException | IllegalAccessException ex) {
-            throw new DIException("## Exception when create bean instance.", ex);
+            throw new DIException("## Exception when create bean instance of class:["+clazz.getName()+"].", ex);
         }
     }
 

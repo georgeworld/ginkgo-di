@@ -12,6 +12,7 @@ import com.georgeinfo.ginkgo.injection.bean.BeanScope;
 import com.georgeinfo.ginkgo.injection.bean.BeanWrapper;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Modifier;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -75,6 +76,11 @@ public class DefaultApplicationContextImpl implements ApplicationContext {
      * 向上下文环境添加一个bean
      */
     public boolean addBean(String beanId, Class<?> beanClass, BeanScope beanScope) throws DIException {
+        //如果传进来的是接口或者抽象类，则无法实例化，所以直接忽略
+        if (beanClass.isInterface() || Modifier.isAbstract(beanClass.getModifiers())) {
+            return false;
+        }
+        
         BeanWrapper bean = new BeanWrapper(beanScope, beanClass);
 
         return addBean(beanId, bean);
